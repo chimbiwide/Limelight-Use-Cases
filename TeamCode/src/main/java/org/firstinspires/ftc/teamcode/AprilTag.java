@@ -4,6 +4,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -16,6 +17,8 @@ import java.util.List;
 public class AprilTag {
     static private Limelight3A limelight;
     private IMU imu;
+
+
 
     public static YawPitchRollAngles getOrientation(IMU imu) {
         return imu.getRobotYawPitchRollAngles();
@@ -30,7 +33,7 @@ public class AprilTag {
 
     public static double getDistance(double a1, double a2, double h1, double h2) {
         double angToGoalDeg = a1 + a2;
-        double angleRadians = angToGoalDeg * (3.14159 / 180.0);
+        double angleRadians = angToGoalDeg * (Math.PI / 180.0);
         return (h2 - h1) / Math.tan(angleRadians);
     }
 
@@ -64,12 +67,24 @@ public class AprilTag {
         }
     }
 
+    public static void trackTag(DcMotor motor, double maxTurnSpeed, double tx) {
+        double kP = 0.015;
+        double power = -tx*kP;
+        power = Math.max(-maxTurnSpeed, Math.min(maxTurnSpeed, power));
+        if (Math.abs(tx) < 3.0) {
+            motor.setPower(0);
+        }
+        else {
+            motor.setPower(power);
+        }
+    }
+
     public static boolean inZone(Point point) {
         double y = point.y;
         double x = point.x;
         if (((y < 72) && (y > Math.abs(x))) || ((y > 72) && (y < -Math.abs(x)-48))) {
             return true;
-        }x
+        }
         else {
             return false;
         }
